@@ -15,7 +15,7 @@ import {
 import { cn } from '@/lib/utils';
 
 const menuItems = [
-  { href: '/', label: 'Dashboard', icon: Home },
+  { href: '/', label: 'Agent', icon: Home },
   { href: '/insights', label: 'Get Insights', icon: BrainCircuit },
   { href: '/community', label: 'Community', icon: MessageSquare },
 ];
@@ -30,7 +30,7 @@ export function AppSidebar() {
           <div className="rounded-lg bg-primary/20 p-2 text-primary">
             <Baby className="h-6 w-6" />
           </div>
-          <span className="font-headline text-lg font-semibold">Insightful Infant</span>
+          <span className="font-headline text-lg font-semibold">Cocoro.Agent</span>
         </div>
       </SidebarHeader>
       <SidebarContent className="p-4">

@@ -1,121 +1,162 @@
 'use client';
 
-import Link from 'next/link';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from '@/components/ui/card';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BrainCircuit, Users, Activity } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { Camera, Stethoscope, Loader2, Lightbulb, Activity, CheckCircle2 } from 'lucide-react';
+import { analyzeBabyStateAction } from '@/lib/actions';
+import type { AnalyzeBabyStateOutput } from '@/ai/flows/analyze-baby-state';
 
-const chartData = [
-  { month: 'January', sleep: 14 },
-  { month: 'February', sleep: 14.5 },
-  { month: 'March', sleep: 15 },
-  { month: 'April', sleep: 14 },
-  { month: 'May', sleep: 13.5 },
-  { month: 'June', sleep: 13 },
-];
+export default function AgentPage() {
+  const { toast } = useToast();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isCameraOn, setIsCameraOn] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<AnalyzeBabyStateOutput | null>(null);
 
-const chartConfig = {
-  sleep: {
-    label: "Sleep (hours)",
-    color: "hsl(var(--primary))",
-  },
-};
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setIsCameraOn(true);
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Camera Access Denied',
+        description: 'Please enable camera permissions in your browser settings to use this app.',
+      });
+    }
+  };
 
-export default function DashboardPage() {
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraOn(false);
+  };
+  
+  const handleToggleCamera = () => {
+    if (isCameraOn) {
+      stopCamera();
+    } else {
+      startCamera();
+    }
+  };
+
+  const handleAnalyze = async () => {
+    if (!isCameraOn || !videoRef.current || !canvasRef.current) {
+      toast({
+        variant: 'destructive',
+        title: 'Camera is off',
+        description: 'Please start the camera before analyzing.',
+      });
+      return;
+    }
+    setIsAnalyzing(true);
+    setAnalysisResult(null);
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    if (context) {
+      context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      const dataUri = canvas.toDataURL('image/jpeg');
+      
+      const result = await analyzeBabyStateAction({ photoDataUri: dataUri });
+      
+      if (result.error) {
+          toast({ variant: 'destructive', title: 'Analysis Failed', description: result.error });
+      } else if (result.data) {
+          setAnalysisResult(result.data);
+          toast({ title: 'Analysis Complete', description: "We've analyzed the baby's state." });
+      }
+    }
+    setIsAnalyzing(false);
+  };
+
+  // Stop camera on component unmount
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
+
   return (
-    <div className="flex flex-col gap-6">
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Generate Insight</CardTitle>
-            <BrainCircuit className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Get personalized, AI-powered parenting advice based on your baby's current behavior.
-            </p>
-          </CardContent>
-          <CardFooter>
-            <Button asChild size="sm" className="w-full">
-              <Link href="/insights">
-                Get Started <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardFooter>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Community Forum</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Connect with other parents, share experiences, and learn from the community.
-            </p>
-          </CardContent>
-          <CardFooter>
-            <Button asChild size="sm" className="w-full" variant="secondary">
-              <Link href="/community">
-                Join Discussion <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardFooter>
-        </Card>
-        <Card>
-           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2">
-                <span className="font-medium text-foreground">10:45 AM:</span> Baby is cooing
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="font-medium text-foreground">9:30 AM:</span> Morning nap started
-              </li>
-               <li className="flex items-center gap-2">
-                <span className="font-medium text-foreground">8:15 AM:</span> Feeding time
-              </li>
-            </ul>
-          </CardContent>
-           <CardFooter>
-             <Button size="sm" className="w-full" variant="outline">View Full Log</Button>
-          </CardFooter>
-        </Card>
+    <div className="mx-auto max-w-2xl space-y-6">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold tracking-tight">Cocoro.Agent</h1>
+        <p className="text-xl text-primary">AI育児支援エージェント</p>
       </div>
+
       <Card>
-        <CardHeader>
-          <CardTitle>Average Sleep Hours</CardTitle>
-          <CardDescription>A look at your baby's sleep patterns over the last 6 months.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig} className="h-[200px] w-full">
-            <BarChart accessibilityLayer data={chartData}>
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="month"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                tickFormatter={(value) => value.slice(0, 3)}
-              />
-              <YAxis />
-              <Tooltip cursor={false} content={<ChartTooltipContent />} />
-              <Bar dataKey="sleep" fill="var(--color-sleep)" radius={4} />
-            </BarChart>
-          </ChartContainer>
+        <CardContent className="p-4">
+          <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted/40">
+            <video ref={videoRef} className="h-full w-full object-cover data-[hidden=true]:hidden" data-hidden={!isCameraOn} autoPlay muted playsInline />
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground data-[hidden=true]:hidden" data-hidden={isCameraOn}>
+              <Camera className="h-16 w-16" />
+              <p className="mt-4">カメラを開始してください</p>
+            </div>
+          </div>
+          <canvas ref={canvasRef} className="hidden" />
         </CardContent>
+        <CardFooter className="grid grid-cols-2 gap-4">
+          <Button onClick={handleToggleCamera} variant={isCameraOn ? "secondary" : "default"} size="lg">
+            <Camera className="mr-2 h-5 w-5" />
+            {isCameraOn ? 'カメラを停止' : 'カメラを開始'}
+          </Button>
+          <Button onClick={handleAnalyze} disabled={!isCameraOn || isAnalyzing} variant="secondary" size="lg">
+            {isAnalyzing ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            ) : (
+              <Stethoscope className="mr-2 h-5 w-5" />
+            )}
+            赤ちゃんの状態を分析
+          </Button>
+        </CardFooter>
       </Card>
+      
+      {analysisResult && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Analysis Result</CardTitle>
+            <CardDescription>Here is what our AI agent observed.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+             <div className="flex items-start gap-4">
+                <Lightbulb className="h-6 w-6 text-primary mt-1" />
+                <div>
+                    <h4 className="font-semibold">Mood</h4>
+                    <p className="text-muted-foreground">{analysisResult.mood}</p>
+                </div>
+             </div>
+             <div className="flex items-start gap-4">
+                <Activity className="h-6 w-6 text-primary mt-1" />
+                <div>
+                    <h4 className="font-semibold">Activity</h4>
+                    <p className="text-muted-foreground">{analysisResult.activity} ({analysisResult.isAsleep ? 'Asleep' : 'Awake'})</p>
+                </div>
+             </div>
+             <div className="flex items-start gap-4">
+                <CheckCircle2 className="h-6 w-6 text-primary mt-1" />
+                <div>
+                    <h4 className="font-semibold">Suggestions</h4>
+                    <ul className="list-disc list-inside text-muted-foreground">
+                        {analysisResult.needs.map((need, index) => <li key={index}>{need}</li>)}
+                    </ul>
+                </div>
+             </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

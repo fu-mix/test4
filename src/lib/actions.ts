@@ -4,6 +4,7 @@ import { generateParentingInsight } from '@/ai/flows/generate-parenting-insight'
 import { detectToxicity } from '@/ai/flows/detect-toxic-interactions';
 import { z } from 'zod';
 import type { CommunityPost } from './types';
+import { analyzeBabyState, type AnalyzeBabyStateOutput } from '@/ai/flows/analyze-baby-state';
 
 const insightSchema = z.object({
   babyActivityDescription: z.string().min(10, 'Please provide a more detailed description.'),
@@ -68,5 +69,22 @@ export async function createCommunityPost(prevState: any, formData: FormData) {
     return { post: newPost };
   } catch (e) {
      return { error: 'Could not create post. Please try again.' };
+  }
+}
+
+export async function analyzeBabyStateAction(
+  { photoDataUri }: { photoDataUri: string }
+): Promise<{ data: AnalyzeBabyStateOutput | null; error: string | null; }> {
+  if (!photoDataUri) {
+    return { data: null, error: 'No image data provided.' };
+  }
+
+  try {
+    const result = await analyzeBabyState({ photoDataUri });
+    return { data: result, error: null };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'An unknown error occurred.';
+    console.error(e);
+    return { data: null, error: `Failed to analyze baby state: ${message}` };
   }
 }

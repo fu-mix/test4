@@ -7,7 +7,7 @@ export function AppHeader() {
       <div className="flex items-center gap-2">
         <SidebarTrigger className="md:hidden" />
         <h1 className="font-headline text-xl font-semibold tracking-tight">
-          Insightful Infant
+          Cocoro.Agent
         </h1>
       </div>
       <div className="ml-auto flex items-center gap-4">
