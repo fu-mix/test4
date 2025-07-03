@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, Stethoscope, Loader2, Lightbulb, Activity, CheckCircle2 } from 'lucide-react';
+import { Camera, Stethoscope, Loader2, Heart, Activity, ClipboardCheck } from 'lucide-react';
 import { analyzeBabyStateAction } from '@/lib/actions';
 import type { AnalyzeBabyStateOutput } from '@/ai/flows/analyze-baby-state';
 
@@ -136,31 +136,40 @@ export default function AgentPage() {
       </Card>
       
       {analysisResult && (
-        <Card>
+        <Card className="border-primary/20 bg-primary/5">
           <CardHeader>
-            <CardTitle>Analysis Result</CardTitle>
-            <CardDescription>Here is what our AI agent observed.</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <Stethoscope className="text-primary" />
+              分析結果
+            </CardTitle>
+            <CardDescription>AI育児支援エージェント「こころ」からのメッセージです。</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6 text-base">
              <div className="flex items-start gap-4">
-                <Lightbulb className="h-6 w-6 text-primary mt-1" />
+                <div className="rounded-full bg-accent/50 p-2 text-primary">
+                    <Heart className="h-6 w-6" />
+                </div>
                 <div>
-                    <h4 className="font-semibold">Mood</h4>
-                    <p className="text-muted-foreground">{analysisResult.mood}</p>
+                    <h4 className="font-semibold text-primary">赤ちゃんの今の気持ち</h4>
+                    <p className="text-foreground/80">{analysisResult.mood}</p>
                 </div>
              </div>
              <div className="flex items-start gap-4">
-                <Activity className="h-6 w-6 text-primary mt-1" />
+                <div className="rounded-full bg-accent/50 p-2 text-primary">
+                    <Activity className="h-6 w-6" />
+                </div>
                 <div>
-                    <h4 className="font-semibold">Activity</h4>
-                    <p className="text-muted-foreground">{analysisResult.activity} ({analysisResult.isAsleep ? 'Asleep' : 'Awake'})</p>
+                    <h4 className="font-semibold text-primary">赤ちゃんの様子</h4>
+                    <p className="text-foreground/80">{analysisResult.activity} ({analysisResult.isAsleep ? 'すやすや眠っています' : '起きています'})</p>
                 </div>
              </div>
              <div className="flex items-start gap-4">
-                <CheckCircle2 className="h-6 w-6 text-primary mt-1" />
+                <div className="rounded-full bg-accent/50 p-2 text-primary">
+                    <ClipboardCheck className="h-6 w-6" />
+                </div>
                 <div>
-                    <h4 className="font-semibold">Suggestions</h4>
-                    <ul className="list-disc list-inside text-muted-foreground">
+                    <h4 className="font-semibold text-primary">こころからのアドバイス</h4>
+                    <ul className="mt-2 list-disc list-inside space-y-1 text-foreground/80">
                         {analysisResult.needs.map((need, index) => <li key={index}>{need}</li>)}
                     </ul>
                 </div>

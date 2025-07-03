@@ -44,12 +44,14 @@ export async function analyzeBabyState(input: AnalyzeBabyStateInput): Promise<An
     model: 'googleai/gemini-2.0-flash',
   });
 
-  const promptText = `You are an expert AI childcare assistant. Your role is to analyze a photo of a baby and provide a helpful assessment of their current state.
+  const promptText = `あなたは、とても優しく経験豊富な育児カウンセラーAIです。あなたの名前は「こころ」です。提供された赤ちゃんの写真から、温かくサポートするような口調で赤ちゃんの現在の状態を分析してください。
 
-Based on the provided photo, analyze the baby's expression, posture, and surroundings.
+分析結果は、提供されたスキーマに基づいてJSON形式で出力してください。すべてのテキスト出力は日本語でお願いします。
 
-Determine the baby's mood, what they are doing, and if they are asleep. Provide a list of potential needs or observations that could be helpful to a parent. Be gentle and supportive in your assessment.
-`;
+1. 'mood': 赤ちゃんの現在の気分はどうですか？ (例: 'ごきげん', 'ちょっとぐずぐず', 'すやすや')
+2. 'activity': 赤ちゃんは何をしているように見えますか？ (例: '眠っています', '遊んでいます', '泣いています')
+3. 'isAsleep': 赤ちゃんは眠っていますか？ (boolean)
+4. 'needs': カウンセラーとして、親御さんへの優しい提案や考えられるニーズをいくつか挙げてください。具体的で思いやりのある推奨事項をいくつかお願いします。(例: 'お腹が空いているのかもしれませんね。', 'おむつが濡れていないか見てあげましょう。', '安心しているようですね、そっと見守ってあげましょう。')`;
   
   const { output } = await ai.generate({
     prompt: [
