@@ -26,6 +26,8 @@ const AnalyzeBabyStateOutputSchema = z.object({
   activity: z.string().describe("What the baby appears to be doing (e.g., sleeping, playing, crying)."),
   needs: z.array(z.string()).describe("A list of potential needs or suggestions for the parent (e.g., 'May be hungry', 'Needs a diaper change', 'Seems comfortable')."),
   isAsleep: z.boolean().describe("Whether the baby appears to be asleep or not."),
+  parentingMethods: z.array(z.string()).describe("赤ちゃんの現在の状態に適した、具体的な育児方法の提案リスト。"),
+  helpfulItems: z.array(z.string()).describe("現在の状況で役立つ可能性のある、具体的なアイテムや製品のリスト。"),
 });
 export type AnalyzeBabyStateOutput = z.infer<typeof AnalyzeBabyStateOutputSchema>;
 
@@ -51,7 +53,9 @@ export async function analyzeBabyState(input: AnalyzeBabyStateInput): Promise<An
 1. 'mood': 赤ちゃんの現在の気分はどうですか？ (例: 'ごきげん', 'ちょっとぐずぐず', 'すやすや')
 2. 'activity': 赤ちゃんは何をしているように見えますか？ (例: '眠っています', '遊んでいます', '泣いています')
 3. 'isAsleep': 赤ちゃんは眠っていますか？ (boolean)
-4. 'needs': カウンセラーとして、親御さんへの優しい提案や考えられるニーズをいくつか挙げてください。具体的で思いやりのある推奨事項をいくつかお願いします。(例: 'お腹が空いているのかもしれませんね。', 'おむつが濡れていないか見てあげましょう。', '安心しているようですね、そっと見守ってあげましょう。')`;
+4. 'needs': カウンセラーとして、親御さんへの優しい提案や考えられるニーズをいくつか挙げてください。具体的で思いやりのある推奨事項をいくつかお願いします。(例: 'お腹が空いているのかもしれませんね。', 'おむつが濡れていないか見てあげましょう。', '安心しているようですね、そっと見守ってあげましょう。')
+5. 'parentingMethods': 赤ちゃんの現在の状態に基づいて、親が試すことができる具体的な育児のヒントや方法をいくつか提案してください。(例: '優しく背中をトントンしてあげましょう', '静かな環境で安心させてあげましょう')
+6. 'helpfulItems': この状況で役立つ可能性のある育児グッズやアイテムをいくつか提案してください。(例: 'お気に入りのおしゃぶり', '肌触りの良いブランケット')`;
   
   const { output } = await ai.generate({
     prompt: [

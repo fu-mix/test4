@@ -1,10 +1,11 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, Stethoscope, Loader2, Heart, Activity, ClipboardCheck } from 'lucide-react';
+import { Camera, Stethoscope, Loader2, Heart, Activity, ClipboardCheck, Lightbulb, ToyBrick } from 'lucide-react';
 import { analyzeBabyStateAction } from '@/lib/actions';
 import type { AnalyzeBabyStateOutput } from '@/ai/flows/analyze-baby-state';
 
@@ -15,6 +16,7 @@ export default function AgentPage() {
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalyzeBabyStateOutput | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
   const startCamera = async () => {
     try {
@@ -23,6 +25,8 @@ export default function AgentPage() {
         videoRef.current.srcObject = stream;
       }
       setIsCameraOn(true);
+      setAnalysisResult(null);
+      setCapturedImage(null);
     } catch (error) {
       console.error('Error accessing camera:', error);
       toast({
@@ -81,6 +85,7 @@ export default function AgentPage() {
     if (context) {
       context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
       const dataUri = canvas.toDataURL('image/jpeg');
+      setCapturedImage(dataUri);
       
       const result = await analyzeBabyStateAction({ photoDataUri: dataUri, apiKey });
       
@@ -111,11 +116,17 @@ export default function AgentPage() {
       <Card>
         <CardContent className="p-4">
           <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted/40">
-            <video ref={videoRef} className="h-full w-full object-cover data-[hidden=true]:hidden" data-hidden={!isCameraOn} autoPlay muted playsInline />
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground data-[hidden=true]:hidden" data-hidden={isCameraOn}>
-              <Camera className="h-16 w-16" />
-              <p className="mt-4">カメラを開始してください</p>
-            </div>
+            {capturedImage ? (
+              <Image src={capturedImage} alt="Analyzed baby photo" fill className="object-cover rounded-lg" />
+            ) : (
+              <>
+                <video ref={videoRef} className="h-full w-full object-cover data-[hidden=true]:hidden" data-hidden={!isCameraOn} autoPlay muted playsInline />
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground data-[hidden=true]:hidden" data-hidden={isCameraOn}>
+                  <Camera className="h-16 w-16" />
+                  <p className="mt-4">カメラを開始してください</p>
+                </div>
+              </>
+            )}
           </div>
           <canvas ref={canvasRef} className="hidden" />
         </CardContent>
@@ -174,6 +185,32 @@ export default function AgentPage() {
                     </ul>
                 </div>
              </div>
+             {analysisResult.parentingMethods && analysisResult.parentingMethods.length > 0 && (
+                <div className="flex items-start gap-4">
+                    <div className="rounded-full bg-accent/50 p-2 text-primary">
+                        <Lightbulb className="h-6 w-6" />
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-primary">育児のヒント</h4>
+                        <ul className="mt-2 list-disc list-inside space-y-1 text-foreground/80">
+                            {analysisResult.parentingMethods.map((method, index) => <li key={index}>{method}</li>)}
+                        </ul>
+                    </div>
+                </div>
+             )}
+             {analysisResult.helpfulItems && analysisResult.helpfulItems.length > 0 && (
+                <div className="flex items-start gap-4">
+                    <div className="rounded-full bg-accent/50 p-2 text-primary">
+                        <ToyBrick className="h-6 w-6" />
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-primary">おすすめグッズ</h4>
+                        <ul className="mt-2 list-disc list-inside space-y-1 text-foreground/80">
+                            {analysisResult.helpfulItems.map((item, index) => <li key={index}>{item}</li>)}
+                        </ul>
+                    </div>
+                </div>
+              )}
           </CardContent>
         </Card>
       )}
