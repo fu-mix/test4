@@ -1,10 +1,41 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 export default function SettingsPage() {
+  const { toast } = useToast();
+  const [apiKey, setApiKey] = useState('');
+
+  useEffect(() => {
+    const storedKey = localStorage.getItem('gemini_api_key');
+    if (storedKey) {
+      setApiKey(storedKey);
+    }
+  }, []);
+
+  const handleSaveApiKey = () => {
+    if (!apiKey) {
+        toast({
+            variant: 'destructive',
+            title: 'API Key is empty',
+            description: 'Please enter a valid Gemini API key.',
+        });
+        return;
+    }
+    localStorage.setItem('gemini_api_key', apiKey);
+    toast({
+      title: 'API Key Saved',
+      description: 'Your Gemini API key has been saved in your browser.',
+    });
+  };
+
   return (
     <div className="mx-auto max-w-2xl space-y-8">
        <div className="space-y-2">
@@ -13,6 +44,30 @@ export default function SettingsPage() {
           Manage your account and notification preferences.
         </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>API Configuration</CardTitle>
+          <CardDescription>
+            Set your Gemini API Key. This is stored securely in your browser&apos;s local storage.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="api-key">Gemini API Key</Label>
+            <Input 
+              id="api-key" 
+              type="password"
+              placeholder="Enter your API key" 
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+            />
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button onClick={handleSaveApiKey}>Save API Key</Button>
+        </CardFooter>
+      </Card>
 
       <Card>
         <CardHeader>

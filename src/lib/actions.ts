@@ -73,14 +73,14 @@ export async function createCommunityPost(prevState: any, formData: FormData) {
 }
 
 export async function analyzeBabyStateAction(
-  { photoDataUri }: { photoDataUri: string }
+  { photoDataUri, apiKey }: { photoDataUri: string; apiKey?: string }
 ): Promise<{ data: AnalyzeBabyStateOutput | null; error: string | null; }> {
   if (!photoDataUri) {
     return { data: null, error: 'No image data provided.' };
   }
 
   try {
-    const result = await analyzeBabyState({ photoDataUri });
+    const result = await analyzeBabyState({ photoDataUri, apiKey });
     return { data: result, error: null };
   } catch (e) {
     const message = e instanceof Error ? e.message : 'An unknown error occurred.';

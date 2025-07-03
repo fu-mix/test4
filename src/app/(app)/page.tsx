@@ -62,6 +62,17 @@ export default function AgentPage() {
     setIsAnalyzing(true);
     setAnalysisResult(null);
 
+    const apiKey = localStorage.getItem('gemini_api_key');
+    if (!apiKey) {
+      toast({
+        variant: 'destructive',
+        title: 'API Key Not Set',
+        description: 'Please set your Gemini API key on the Settings page.',
+      });
+      setIsAnalyzing(false);
+      return;
+    }
+
     const video = videoRef.current;
     const canvas = canvasRef.current;
     canvas.width = video.videoWidth;
@@ -71,7 +82,7 @@ export default function AgentPage() {
       context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
       const dataUri = canvas.toDataURL('image/jpeg');
       
-      const result = await analyzeBabyStateAction({ photoDataUri: dataUri });
+      const result = await analyzeBabyStateAction({ photoDataUri: dataUri, apiKey });
       
       if (result.error) {
           toast({ variant: 'destructive', title: 'Analysis Failed', description: result.error });

@@ -7,7 +7,8 @@
  * - AnalyzeBabyStateOutput - The return type for the analyzeBabyState function.
  */
 
-import {ai} from '@/ai/genkit';
+import {genkit} from 'genkit';
+import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 
 const AnalyzeBabyStateInputSchema = z.object({
@@ -16,6 +17,7 @@ const AnalyzeBabyStateInputSchema = z.object({
     .describe(
       "A photo of a baby, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
+  apiKey: z.string().optional().describe('The Gemini API key to use for the request.'),
 });
 export type AnalyzeBabyStateInput = z.infer<typeof AnalyzeBabyStateInputSchema>;
 
@@ -27,32 +29,41 @@ const AnalyzeBabyStateOutputSchema = z.object({
 });
 export type AnalyzeBabyStateOutput = z.infer<typeof AnalyzeBabyStateOutputSchema>;
 
-export async function analyzeBabyState(input: AnalyzeBabyStateInput): Promise<AnalyzeBabyStateOutput> {
-  return analyzeBabyStateFlow(input);
-}
 
-const prompt = ai.definePrompt({
-  name: 'analyzeBabyStatePrompt',
-  input: {schema: AnalyzeBabyStateInputSchema},
-  output: {schema: AnalyzeBabyStateOutputSchema},
-  prompt: `You are an expert AI childcare assistant. Your role is to analyze a photo of a baby and provide a helpful assessment of their current state.
+export async function analyzeBabyState(input: AnalyzeBabyStateInput): Promise<AnalyzeBabyStateOutput> {
+  const validatedInput = AnalyzeBabyStateInputSchema.parse(input);
+
+  const apiKey = validatedInput.apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY is not configured. Please set it on the Settings page.');
+  }
+
+  const ai = genkit({
+    plugins: [googleAI({apiKey})],
+    model: 'googleai/gemini-2.0-flash',
+  });
+
+  const promptText = `You are an expert AI childcare assistant. Your role is to analyze a photo of a baby and provide a helpful assessment of their current state.
 
 Based on the provided photo, analyze the baby's expression, posture, and surroundings.
 
-Photo: {{media url=photoDataUri}}
-
 Determine the baby's mood, what they are doing, and if they are asleep. Provide a list of potential needs or observations that could be helpful to a parent. Be gentle and supportive in your assessment.
-`,
-});
+`;
+  
+  const { output } = await ai.generate({
+    prompt: [
+        { text: promptText },
+        { media: { url: validatedInput.photoDataUri } },
+    ],
+    output: {
+      schema: AnalyzeBabyStateOutputSchema,
+    },
+  });
 
-const analyzeBabyStateFlow = ai.defineFlow(
-  {
-    name: 'analyzeBabyStateFlow',
-    inputSchema: AnalyzeBabyStateInputSchema,
-    outputSchema: AnalyzeBabyStateOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  if (!output) {
+      throw new Error("The AI model did not return a valid analysis.");
   }
-);
+  
+  return output;
+}
