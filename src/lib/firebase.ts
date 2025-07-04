@@ -4,20 +4,26 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 /**
- * Your Firebase project configuration.
+ * Firebaseプロジェクトの設定情報です。
+ * 
+ * 重要：これらのキーはクライアント側でFirebaseプロジェクトを識別するためのもので、公開されることを意図しています。
+ * アプリのビルド時やサーバーサイドのコード（actions.tsなど）が実行される際に、これらの値が利用可能である必要があります。
+ * 
+ * そのため、プロジェクトのルートにある .env ファイルに NEXT_PUBLIC_ というプレフィックスを付けて保存する必要があります。
+ * これがNext.jsアプリケーションでこの種の設定を扱うための、標準的で安全な方法です。
  *
- * IMPORTANT: These keys are meant to be public and are used to identify your
- * Firebase project on the client-side. They need to be available when the app
- * is built and when server-side code (like in `actions.ts`) runs.
- *
- * For this reason, they must be stored in a .env file at the root of your project,
- * prefixed with NEXT_PUBLIC_. This is the standard and secure way to handle
- * this type of configuration in a Next.js application.
- *
- * You can find these values in your Firebase project console.
- * Go to Project Settings (click the ⚙️ gear icon) > General tab.
- * In the "Your apps" card, select the Web app.
- * The `projectId` is also listed under the "Your project" section on the same page.
+ * ---
+ * 
+ * これらの値はFirebaseプロジェクトのコンソールで見つけることができます。
+ * 1. プロジェクト設定（⚙️歯車アイコン）> 全般 タブに移動します。
+ * 2. 「マイアプリ」カードで、ウェブアプリを選択します。
+ * 3. 「Firebase SDK snippet」セクションで「構成」を選ぶと、以下のキーが表示されます。
+ *    - apiKey
+ *    - authDomain
+ *    - storageBucket
+ *    - messagingSenderId
+ *    - appId
+ * 4. 「プロジェクトID」は、「プロジェクト」カードにも記載されています。
  */
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -28,8 +34,8 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-// We check if the app is already initialized to avoid errors during hot-reloading.
+// Firebaseの初期化
+// ホットリロード中にエラーが発生するのを防ぐため、アプリがすでに初期化されているかを確認します。
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const storage = getStorage(app);
