@@ -42,7 +42,7 @@ export async function analyzeBabyState(input: AnalyzeBabyStateInput): Promise<An
   const apiKey = validatedInput.apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not configured. Please set it on the Settings page.');
+    throw new Error('GEMINI_API_KEY is not configured. Please set it in your .env file or on the Settings page.');
   }
 
   const ai = genkit({

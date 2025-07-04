@@ -67,15 +67,6 @@ export default function AgentPage() {
     setAnalysisResult(null);
 
     const apiKey = localStorage.getItem('gemini_api_key');
-    if (!apiKey) {
-      toast({
-        variant: 'destructive',
-        title: 'API Key Not Set',
-        description: 'Please set your Gemini API key on the Settings page.',
-      });
-      setIsAnalyzing(false);
-      return;
-    }
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -87,7 +78,7 @@ export default function AgentPage() {
       const dataUri = canvas.toDataURL('image/jpeg');
       setCapturedImage(dataUri);
       
-      const result = await analyzeBabyStateAction({ photoDataUri: dataUri, apiKey });
+      const result = await analyzeBabyStateAction({ photoDataUri: dataUri, apiKey: apiKey ?? undefined });
       
       setIsAnalyzing(false); // Stop loading indicator after analysis is complete
 
