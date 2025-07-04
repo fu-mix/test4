@@ -6,24 +6,32 @@ import { getStorage } from 'firebase/storage';
 /**
  * Firebaseプロジェクトの設定情報です。
  * 
- * 重要：これらのキーはクライアント側でFirebaseプロジェクトを識別するためのもので、公開されることを意図しています。
- * アプリのビルド時やサーバーサイドのコード（actions.tsなど）が実行される際に、これらの値が利用可能である必要があります。
- * 
- * そのため、プロジェクトのルートにある .env ファイルに NEXT_PUBLIC_ というプレフィックスを付けて保存する必要があります。
- * これがNext.jsアプリケーションでこの種の設定を扱うための、標準的で安全な方法です。
+ * NEXT_PUBLIC_プレフィックスが付いたこれらのキーは、クライアントとサーバーの両方で安全に利用でき、
+ * アプリのビルド時に .env ファイルから読み込まれます。
  *
  * ---
+ * ### 各キーの確認方法
  * 
- * これらの値はFirebaseプロジェクトのコンソールで見つけることができます。
- * 1. プロジェクト設定（⚙️歯車アイコン）> 全般 タブに移動します。
- * 2. 「マイアプリ」カードで、ウェブアプリを選択します。
- * 3. 「Firebase SDK snippet」セクションで「構成」を選ぶと、以下のキーが表示されます。
- *    - apiKey
- *    - authDomain
- *    - storageBucket
- *    - messagingSenderId
- *    - appId
- * 4. 「プロジェクトID」は、「プロジェクト」カードにも記載されています。
+ * 以下の手順で、すべてのキーを一度に確認できます。
+ * 
+ * 1.  **[Firebaseコンソール](https://console.firebase.google.com/)** にアクセスし、あなたのプロジェクト（`alpine-air-460510-k3`）を選択します。
+ * 2.  左上のサイドバーにある **歯車アイコン (⚙️)** をクリックし、「**プロジェクトの設定**」を選択します。
+ * 3.  「**全般**」タブが開かれていることを確認します。
+ * 4.  ページを下にスクロールし、「**マイアプリ**」というカードを探します。
+ * 5.  あなたのウェブアプリ（通常はアプリのニックネームやバンドルIDが表示されています）をクリックします。
+ * 6.  「**Firebase SDK snippet**」セクションで、「**構成 (Config)**」オプションを選択します。
+ * 7.  以下のようなコードが表示されます。この中の値をコピーして、このプロジェクトのルートにある `.env` ファイルに貼り付けてください。
+ * 
+ * ```javascript
+ * const firebaseConfig = {
+ *   apiKey: "...",            // -> NEXT_PUBLIC_FIREBASE_API_KEY
+ *   authDomain: "...",        // -> NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+ *   projectId: "...",         // -> NEXT_PUBLIC_FIREBASE_PROJECT_ID
+ *   storageBucket: "...",     // -> NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+ *   messagingSenderId: "...", // -> NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+ *   appId: "..."              // -> NEXT_PUBLIC_FIREBASE_APP_ID
+ * };
+ * ```
  */
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
