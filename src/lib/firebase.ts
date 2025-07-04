@@ -4,17 +4,18 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 /**
- * To get these values, create a new Web project in your Firebase console.
+ * Your Firebase project configuration.
+ *
+ * IMPORTANT: These keys are meant to be public and are used to identify your
+ * Firebase project on the client-side. They need to be available when the app
+ * is built and when server-side code (like in `actions.ts`) runs.
+ *
+ * For this reason, they must be stored in a .env file at the root of your project,
+ * prefixed with NEXT_PUBLIC_. This is the standard and secure way to handle
+ * this type of configuration in a Next.js application.
+ *
+ * You can get these values by creating a new Web project in your Firebase console.
  * Go to Project Settings > General > Your apps > Web app.
- *
- * Then, add these keys to your .env file at the root of your project.
- *
- * NEXT_PUBLIC_FIREBASE_API_KEY=...
- * NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
- * NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
- * NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
- * NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
- * NEXT_PUBLIC_FIREBASE_APP_ID=...
  */
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -26,6 +27,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
+// We check if the app is already initialized to avoid errors during hot-reloading.
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const storage = getStorage(app);
