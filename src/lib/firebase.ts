@@ -4,34 +4,13 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 /**
- * Firebaseプロジェクトの設定情報です。
- * 
- * NEXT_PUBLIC_プレフィックスが付いたこれらのキーは、クライアントとサーバーの両方で安全に利用でき、
- * アプリのビルド時に .env ファイルから読み込まれます。
+ * Your Firebase project's configuration.
  *
- * ---
- * ### 各キーの確認方法
- * 
- * 以下の手順で、すべてのキーを一度に確認できます。
- * 
- * 1.  **[Firebaseコンソール](https://console.firebase.google.com/)** にアクセスし、あなたのプロジェクト（`alpine-air-460510-k3`）を選択します。
- * 2.  左上のサイドバーにある **歯車アイコン (⚙️)** をクリックし、「**プロジェクトの設定**」を選択します。
- * 3.  「**全般**」タブが開かれていることを確認します。
- * 4.  ページを下にスクロールし、「**マイアプリ**」というカードを探します。
- * 5.  あなたのウェブアプリ（通常はアプリのニックネームやバンドルIDが表示されています）をクリックします。
- * 6.  「**Firebase SDK snippet**」セクションで、「**構成 (Config)**」オプションを選択します。
- * 7.  以下のようなコードが表示されます。この中の値をコピーして、このプロジェクトのルートにある `.env` ファイルに貼り付けてください。
- * 
- * ```javascript
- * const firebaseConfig = {
- *   apiKey: "...",            // -> NEXT_PUBLIC_FIREBASE_API_KEY
- *   authDomain: "...",        // -> NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
- *   projectId: "...",         // -> NEXT_PUBLIC_FIREBASE_PROJECT_ID
- *   storageBucket: "...",     // -> NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
- *   messagingSenderId: "...", // -> NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
- *   appId: "..."              // -> NEXT_PUBLIC_FIREBASE_APP_ID
- * };
- * ```
+ * The `NEXT_PUBLIC_` prefix makes these keys available to both the client and server,
+ * and they are loaded from your `.env` file during the build process.
+ *
+ * You can find these values in the Firebase Console:
+ * Go to Project settings (⚙️) > General > Your apps > Web app > Firebase SDK snippet > Config.
  */
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -42,8 +21,8 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Firebaseの初期化
-// ホットリロード中にエラーが発生するのを防ぐため、アプリがすでに初期化されているかを確認します。
+// Initialize Firebase
+// We check if the app is already initialized to prevent errors during hot-reloads.
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const storage = getStorage(app);

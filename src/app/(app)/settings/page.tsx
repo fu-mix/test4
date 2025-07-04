@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle2, XCircle } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export default function SettingsPage() {
   const { toast } = useToast();
@@ -112,11 +113,56 @@ export default function SettingsPage() {
                 <span className="font-medium text-destructive">Not Configured</span>
               )}
             </div>
-            {!isFirebaseConfigured && (
-              <p className="text-xs text-muted-foreground pl-8">
-                Firebase keys not found in your <code className="font-mono text-xs bg-muted p-1 rounded">.env</code> file. Find them in Firebase Console &gt; Project settings.
-              </p>
-            )}
+             <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1" className="border-b-0">
+                <AccordionTrigger className="pt-2 text-xs text-muted-foreground hover:no-underline">
+                  How to find your Firebase keys
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="prose prose-sm prose-p:text-muted-foreground text-foreground/90 max-w-none space-y-2 pt-2 text-xs">
+                    <p>
+                      You can find all required keys at once in your Firebase project settings. These keys should be placed in the <code>.env</code> file in your project's root directory.
+                    </p>
+                    <ol className="list-decimal list-inside space-y-2 pl-2">
+                      <li>
+                        Go to the{' '}
+                        <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                          Firebase Console
+                        </a>{' '}
+                        and select your project.
+                      </li>
+                      <li>
+                        Click the <strong>gear icon (⚙️)</strong> in the top-left sidebar and select{' '}
+                        <strong>Project settings</strong>.
+                      </li>
+                      <li>
+                        Under the <strong>General</strong> tab, scroll down to the <strong>Your apps</strong> card.
+                      </li>
+                      <li>
+                        Click on your web app. If you don't have one, create one by clicking 'Add app' and selecting the web platform (</>).
+                      </li>
+                      <li>
+                        In the <strong>Firebase SDK snippet</strong> section, select the <strong>Config</strong> option.
+                      </li>
+                      <li>
+                        You will see a block of code. Copy the corresponding values into your project's{' '}
+                        <code>.env</code> file.
+                      </li>
+                    </ol>
+                    <div className="rounded-md bg-muted p-4 font-mono text-xs">
+                      <p>const firebaseConfig = &#123;</p>
+                      <p className="pl-4">apiKey: "..." <span className="text-muted-foreground">// -&gt; NEXT_PUBLIC_FIREBASE_API_KEY</span></p>
+                      <p className="pl-4">authDomain: "..." <span className="text-muted-foreground">// -&gt; NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN</span></p>
+                      <p className="pl-4">projectId: "..." <span className="text-muted-foreground">// -&gt; NEXT_PUBLIC_FIREBASE_PROJECT_ID</span></p>
+                      <p className="pl-4">storageBucket: "..." <span className="text-muted-foreground">// -&gt; NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET</span></p>
+                      <p className="pl-4">messagingSenderId: "..." <span className="text-muted-foreground">// -&gt; NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID</span></p>
+                      <p className="pl-4">appId: "..." <span className="text-muted-foreground">// -&gt; NEXT_PUBLIC_FIREBASE_APP_ID</span></p>
+                      <p>&#125;;</p>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
         </CardContent>
       </Card>
