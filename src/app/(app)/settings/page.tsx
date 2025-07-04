@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 export default function SettingsPage() {
   const { toast } = useToast();
@@ -35,6 +36,8 @@ export default function SettingsPage() {
       description: 'Your Gemini API key has been saved in your browser.',
     });
   };
+
+  const isFirebaseConfigured = !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
@@ -67,6 +70,55 @@ export default function SettingsPage() {
         <CardFooter>
           <Button onClick={handleSaveApiKey}>Save API Key</Button>
         </CardFooter>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Configuration Status</CardTitle>
+          <CardDescription>
+            Check if your API keys and project settings are configured correctly.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {apiKey ? (
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+              ) : (
+                <XCircle className="h-5 w-5 text-destructive" />
+              )}
+              <span>Gemini API Key</span>
+            </div>
+            {apiKey ? (
+              <span className="font-medium text-green-600">Configured</span>
+            ) : (
+              <span className="font-medium text-destructive">Not Configured</span>
+            )}
+          </div>
+          <Separator />
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+               <div className="flex items-center gap-3">
+                {isFirebaseConfigured ? (
+                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-destructive" />
+                )}
+                <span>Firebase Configuration</span>
+              </div>
+              {isFirebaseConfigured ? (
+                <span className="font-medium text-green-600">Configured</span>
+              ) : (
+                <span className="font-medium text-destructive">Not Configured</span>
+              )}
+            </div>
+            {!isFirebaseConfigured && (
+              <p className="text-xs text-muted-foreground pl-8">
+                Firebase keys not found. Please add them to your <code className="font-mono text-xs bg-muted p-1 rounded">.env</code> file.
+              </p>
+            )}
+          </div>
+        </CardContent>
       </Card>
 
       <Card>
