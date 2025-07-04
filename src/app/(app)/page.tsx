@@ -5,8 +5,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, Stethoscope, Loader2, Heart, Activity, ClipboardCheck, Lightbulb, ToyBrick } from 'lucide-react';
-import { analyzeBabyStateAction } from '@/lib/actions';
+import { Camera, Stethoscope, Loader2, Heart, Activity, ClipboardCheck, Lightbulb, ToyBrick, BookText } from 'lucide-react';
+import { analyzeBabyStateAction, saveAnalysisResultAction } from '@/lib/actions';
 import type { AnalyzeBabyStateOutput } from '@/ai/flows/analyze-baby-state';
 
 export default function AgentPage() {
@@ -67,15 +67,6 @@ export default function AgentPage() {
     setAnalysisResult(null);
 
     const apiKey = localStorage.getItem('gemini_api_key');
-    if (!apiKey) {
-      toast({
-        variant: 'destructive',
-        title: 'API Key Not Set',
-        description: 'Please set your Gemini API key on the Settings page.',
-      });
-      setIsAnalyzing(false);
-      return;
-    }
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -87,16 +78,30 @@ export default function AgentPage() {
       const dataUri = canvas.toDataURL('image/jpeg');
       setCapturedImage(dataUri);
       
-      const result = await analyzeBabyStateAction({ photoDataUri: dataUri, apiKey });
+      const result = await analyzeBabyStateAction({ photoDataUri: dataUri, apiKey: apiKey ?? undefined });
       
+      setIsAnalyzing(false); // Stop loading indicator after analysis is complete
+
       if (result.error) {
           toast({ variant: 'destructive', title: 'Analysis Failed', description: result.error });
       } else if (result.data) {
           setAnalysisResult(result.data);
-          toast({ title: 'Analysis Complete', description: "We've analyzed the baby's state." });
+
+          // Save result to Firebase in the background
+          saveAnalysisResultAction({ photoDataUri: dataUri, analysisResult: result.data })
+            .then(saveResult => {
+              if (!saveResult.success) {
+                toast({
+                  variant: 'destructive',
+                  title: 'Failed to Save History',
+                  description: saveResult.error,
+                });
+              }
+            });
       }
+    } else {
+      setIsAnalyzing(false);
     }
-    setIsAnalyzing(false);
   };
 
   // Stop camera on component unmount
@@ -207,6 +212,26 @@ export default function AgentPage() {
                         <h4 className="font-semibold text-primary">おすすめグッズ</h4>
                         <ul className="mt-2 list-disc list-inside space-y-1 text-foreground/80">
                             {analysisResult.helpfulItems.map((item, index) => <li key={index}>{item}</li>)}
+                        </ul>
+                    </div>
+                </div>
+              )}
+            {analysisResult.suggestedResources && analysisResult.suggestedResources.length > 0 && (
+                <div className="flex items-start gap-4">
+                    <div className="rounded-full bg-accent/50 p-2 text-primary">
+                        <BookText className="h-6 w-6" />
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-primary">おすすめの参考情報</h4>
+                         <ul className="mt-2 space-y-2 text-foreground/80">
+                          {analysisResult.suggestedResources.map((resource, index) => (
+                            <li key={index}>
+                              <a href={resource.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm underline-offset-4 hover:underline hover:text-primary">
+                                <span>{resource.title}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 opacity-70"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" x2="21" y1="14" y2="3"></line></svg>
+                              </a>
+                            </li>
+                          ))}
                         </ul>
                     </div>
                 </div>

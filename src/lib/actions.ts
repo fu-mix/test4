@@ -76,6 +76,7 @@ export async function createCommunityPost(prevState: any, formData: FormData) {
   }
 }
 
+// This action performs the analysis only.
 export async function analyzeBabyStateAction(
   { photoDataUri, apiKey }: { photoDataUri: string; apiKey?: string }
 ): Promise<{ data: AnalyzeBabyStateOutput | null; error: string | null; }> {
@@ -85,7 +86,23 @@ export async function analyzeBabyStateAction(
 
   try {
     const analysisResult = await analyzeBabyState({ photoDataUri, apiKey });
-    
+    return { data: analysisResult, error: null };
+  } catch (e) {
+    let message = e instanceof Error ? e.message : 'An unknown error occurred.';
+    console.error(e);
+    // Check for common Firebase security rule errors
+    if (message.includes('storage/unauthorized') || message.includes('permission-denied')) {
+      message = 'Firebase Security Rules are blocking access. Please ensure your Storage and Firestore rules allow writes.';
+    }
+    return { data: null, error: `Failed to analyze baby state: ${message}` };
+  }
+}
+
+// This action saves the result to Firebase.
+export async function saveAnalysisResultAction(
+  { photoDataUri, analysisResult }: { photoDataUri: string; analysisResult: AnalyzeBabyStateOutput }
+): Promise<{ success: boolean; error: string | null }> {
+  try {
     // Upload image to Firebase Storage
     const storageRef = ref(storage, `analyses/${Date.now()}.jpeg`);
     const uploadResult = await uploadString(storageRef, photoDataUri, 'data_url');
@@ -98,14 +115,13 @@ export async function analyzeBabyStateAction(
       createdAt: serverTimestamp(),
     });
 
-    return { data: analysisResult, error: null };
+    return { success: true, error: null };
   } catch (e) {
     let message = e instanceof Error ? e.message : 'An unknown error occurred.';
     console.error(e);
-    // Check for common Firebase security rule errors
     if (message.includes('storage/unauthorized') || message.includes('permission-denied')) {
       message = 'Firebase Security Rules are blocking access. Please ensure your Storage and Firestore rules allow writes.';
     }
-    return { data: null, error: `Failed to analyze baby state: ${message}` };
+    return { success: false, error: `Failed to save analysis: ${message}` };
   }
 }
