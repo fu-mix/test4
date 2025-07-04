@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -121,7 +122,7 @@ export default function SettingsPage() {
                 <AccordionContent>
                   <div className="prose prose-sm prose-p:text-muted-foreground text-foreground/90 max-w-none space-y-2 pt-2 text-xs">
                     <p>
-                      You can find all required keys at once in your Firebase project settings. These keys should be placed in the <code>.env</code> file in your project's root directory.
+                      You can find all required keys at once in your Firebase project settings. These keys should be placed in the <code>.env</code> file in your project&apos;s root directory.
                     </p>
                     <ol className="list-decimal list-inside space-y-2 pl-2">
                       <li>
@@ -139,13 +140,13 @@ export default function SettingsPage() {
                         Under the <strong>General</strong> tab, scroll down to the <strong>Your apps</strong> card.
                       </li>
                       <li>
-                        Click on your web app. If you don't have one, create one by clicking 'Add app' and selecting the web platform (</>).
+                        Click on your web app. If you don&apos;t have one, create one by clicking &apos;Add app&apos; and selecting the web platform (the {'</>'} icon).
                       </li>
                       <li>
                         In the <strong>Firebase SDK snippet</strong> section, select the <strong>Config</strong> option.
                       </li>
                       <li>
-                        You will see a block of code. Copy the corresponding values into your project's{' '}
+                        You will see a block of code. Copy the corresponding values into your project&apos;s{' '}
                         <code>.env</code> file.
                       </li>
                     </ol>
