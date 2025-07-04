@@ -30,7 +30,7 @@ const AnalyzeBabyStateOutputSchema = z.object({
   helpfulItems: z.array(z.string()).describe("現在の状況で役立つ可能性のある、具体的なアイテムや製品のリスト。"),
   suggestedResources: z.array(z.object({
     title: z.string().describe("リソースのタイトル"),
-    url: z.string().url().describe("リソースのURL")
+    url: z.string().describe("リソースのURL")
   })).optional().describe("役立つオンラインリソース（ウェブサイト、YouTube動画など）のリスト。"),
 });
 export type AnalyzeBabyStateOutput = z.infer<typeof AnalyzeBabyStateOutputSchema>;
