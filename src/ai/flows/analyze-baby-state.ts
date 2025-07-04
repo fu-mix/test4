@@ -28,6 +28,10 @@ const AnalyzeBabyStateOutputSchema = z.object({
   isAsleep: z.boolean().describe("Whether the baby appears to be asleep or not."),
   parentingMethods: z.array(z.string()).describe("赤ちゃんの現在の状態に適した、具体的な育児方法の提案リスト。"),
   helpfulItems: z.array(z.string()).describe("現在の状況で役立つ可能性のある、具体的なアイテムや製品のリスト。"),
+  suggestedResources: z.array(z.object({
+    title: z.string().describe("リソースのタイトル"),
+    url: z.string().url().describe("リソースのURL")
+  })).optional().describe("役立つオンラインリソース（ウェブサイト、YouTube動画など）のリスト。"),
 });
 export type AnalyzeBabyStateOutput = z.infer<typeof AnalyzeBabyStateOutputSchema>;
 
@@ -50,14 +54,15 @@ export async function analyzeBabyState(input: AnalyzeBabyStateInput): Promise<An
 
 分析結果は、提供されたスキーマに基づいてJSON形式で出力してください。すべてのテキスト出力は日本語でお願いします。
 
-もし赤ちゃんの機嫌が悪い（例：「泣いている」「怒っている」「ぐずっている」）と判断した場合、ウェブ検索ツールを使って、赤ちゃんをあやすための具体的な方法や、笑わせるためのユニークなアイデアを探してください。見つけた提案を 'parentingMethods' のリストに加えてください。
+もし赤ちゃんの機嫌が悪い（例：「泣いている」「怒っている」「ぐずっている」）と判断した場合、ウェブ検索ツールを使って、赤ちゃんをあやすための具体的な方法や、笑わせるためのユニークなアイデアを探してください。見つけた提案を 'parentingMethods' のリストに加えてください。さらに、関連する役立つウェブサイトやYouTube動画を検索し、そのタイトルとURLを'suggestedResources'リストに必ず追加してください。
 
 1. 'mood': 赤ちゃんの現在の気分はどうですか？ (例: 'ごきげん', 'ちょっとぐずぐず', 'すやすや')
 2. 'activity': 赤ちゃんは何をしているように見えますか？ (例: '眠っています', '遊んでいます', '泣いています')
 3. 'isAsleep': 赤ちゃんは眠っていますか？ (boolean)
 4. 'needs': カウンセラーとして、親御さんへの優しい提案や考えられるニーズをいくつか挙げてください。具体的で思いやりのある推奨事項をいくつかお願いします。(例: 'お腹が空いているのかもしれませんね。', 'おむつが濡れていないか見てあげましょう。', '安心しているようですね、そっと見守ってあげましょう。')
 5. 'parentingMethods': 赤ちゃんの現在の状態に基づいて、親が試すことができる具体的な育児のヒントや方法をいくつか提案してください。(例: '優しく背中をトントンしてあげましょう', '静かな環境で安心させてあげましょう')
-6. 'helpfulItems': この状況で役立つ可能性のある育児グッズやアイテムをいくつか提案してください。(例: 'お気に入りのおしゃぶり', '肌触りの良いブランケット')`;
+6. 'helpfulItems': この状況で役立つ可能性のある育児グッズやアイテムをいくつか提案してください。(例: 'お気に入りのおしゃぶり', '肌触りの良いブランケット')
+7. 'suggestedResources': 機嫌が悪い場合、赤ちゃんをあやすのに役立つウェブサイトやYouTube動画のURLとタイトルのリストをいくつか提案してください。(optional)`;
   
   const { output } = await ai.generate({
     prompt: [
