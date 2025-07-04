@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Camera, Stethoscope, Loader2, Heart, Activity, ClipboardCheck, Lightbulb, ToyBrick } from 'lucide-react';
-import { analyzeBabyStateAction } from '@/lib/actions';
+import { analyzeBabyStateAction, saveAnalysisResultAction } from '@/lib/actions';
 import type { AnalyzeBabyStateOutput } from '@/ai/flows/analyze-baby-state';
 
 export default function AgentPage() {
@@ -89,14 +89,28 @@ export default function AgentPage() {
       
       const result = await analyzeBabyStateAction({ photoDataUri: dataUri, apiKey });
       
+      setIsAnalyzing(false); // Stop loading indicator after analysis is complete
+
       if (result.error) {
           toast({ variant: 'destructive', title: 'Analysis Failed', description: result.error });
       } else if (result.data) {
           setAnalysisResult(result.data);
-          toast({ title: 'Analysis Complete', description: "We've analyzed the baby's state." });
+
+          // Save result to Firebase in the background
+          saveAnalysisResultAction({ photoDataUri: dataUri, analysisResult: result.data })
+            .then(saveResult => {
+              if (!saveResult.success) {
+                toast({
+                  variant: 'destructive',
+                  title: 'Failed to Save History',
+                  description: saveResult.error,
+                });
+              }
+            });
       }
+    } else {
+      setIsAnalyzing(false);
     }
-    setIsAnalyzing(false);
   };
 
   // Stop camera on component unmount
