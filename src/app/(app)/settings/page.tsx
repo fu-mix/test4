@@ -76,7 +76,7 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle>Configuration Status</CardTitle>
           <CardDescription>
-            Check if your API keys and project settings are configured correctly.
+            Check if your environment settings for Firebase and Gemini are configured correctly.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
@@ -114,7 +114,7 @@ export default function SettingsPage() {
             </div>
             {!isFirebaseConfigured && (
               <p className="text-xs text-muted-foreground pl-8">
-                Firebase keys not found. Please add them to your <code className="font-mono text-xs bg-muted p-1 rounded">.env</code> file.
+                Firebase keys not found in your <code className="font-mono text-xs bg-muted p-1 rounded">.env</code> file. Find them in Firebase Console &gt; Project settings.
               </p>
             )}
           </div>

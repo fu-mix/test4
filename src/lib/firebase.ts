@@ -14,8 +14,10 @@ import { getStorage } from 'firebase/storage';
  * prefixed with NEXT_PUBLIC_. This is the standard and secure way to handle
  * this type of configuration in a Next.js application.
  *
- * You can get these values by creating a new Web project in your Firebase console.
- * Go to Project Settings > General > Your apps > Web app.
+ * You can find these values in your Firebase project console.
+ * Go to Project Settings (click the ⚙️ gear icon) > General tab.
+ * In the "Your apps" card, select the Web app.
+ * The `projectId` is also listed under the "Your project" section on the same page.
  */
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
