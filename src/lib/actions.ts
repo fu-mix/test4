@@ -100,8 +100,12 @@ export async function analyzeBabyStateAction(
 
     return { data: analysisResult, error: null };
   } catch (e) {
-    const message = e instanceof Error ? e.message : 'An unknown error occurred.';
+    let message = e instanceof Error ? e.message : 'An unknown error occurred.';
     console.error(e);
+    // Check for common Firebase security rule errors
+    if (message.includes('storage/unauthorized') || message.includes('permission-denied')) {
+      message = 'Firebase Security Rules are blocking access. Please ensure your Storage and Firestore rules allow writes.';
+    }
     return { data: null, error: `Failed to analyze baby state: ${message}` };
   }
 }
