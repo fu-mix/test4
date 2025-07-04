@@ -5,6 +5,10 @@ import { detectToxicity } from '@/ai/flows/detect-toxic-interactions';
 import { z } from 'zod';
 import type { CommunityPost } from './types';
 import { analyzeBabyState, type AnalyzeBabyStateOutput } from '@/ai/flows/analyze-baby-state';
+import { db, storage } from '@/lib/firebase';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
 
 const insightSchema = z.object({
   babyActivityDescription: z.string().min(10, 'Please provide a more detailed description.'),
@@ -80,8 +84,21 @@ export async function analyzeBabyStateAction(
   }
 
   try {
-    const result = await analyzeBabyState({ photoDataUri, apiKey });
-    return { data: result, error: null };
+    const analysisResult = await analyzeBabyState({ photoDataUri, apiKey });
+    
+    // Upload image to Firebase Storage
+    const storageRef = ref(storage, `analyses/${Date.now()}.jpeg`);
+    const uploadResult = await uploadString(storageRef, photoDataUri, 'data_url');
+    const imageUrl = await getDownloadURL(uploadResult.ref);
+
+    // Save analysis and image URL to Firestore
+    await addDoc(collection(db, 'analyses'), {
+      analysis: analysisResult,
+      imageUrl,
+      createdAt: serverTimestamp(),
+    });
+
+    return { data: analysisResult, error: null };
   } catch (e) {
     const message = e instanceof Error ? e.message : 'An unknown error occurred.';
     console.error(e);

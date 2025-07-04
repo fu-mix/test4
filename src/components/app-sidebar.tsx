@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Baby, Home, MessageSquare, Settings, BrainCircuit } from 'lucide-react';
+import { Baby, Home, MessageSquare, Settings, BrainCircuit, History } from 'lucide-react';
 import {
   Sidebar,
   SidebarHeader,
@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 
 const menuItems = [
   { href: '/', label: 'Agent', icon: Home },
+  { href: '/history', label: 'History', icon: History },
   { href: '/insights', label: 'Get Insights', icon: BrainCircuit },
   { href: '/community', label: 'Community', icon: MessageSquare },
 ];
